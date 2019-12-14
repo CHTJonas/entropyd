@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"syscall"
 )
 
 type Sample struct {
@@ -14,6 +15,10 @@ type Sample struct {
 
 func (sample *Sample) validate() bool {
 	return sample.Entropy.validate()
+}
+
+func (sample *Sample) getData() []byte {
+	return sample.Entropy.getData()
 }
 
 type Entropy struct {
@@ -44,9 +49,10 @@ func (entropy *Entropy) validate() bool {
 	return true
 }
 
-func main() {
+func fetchEntropy(bits uint) *Sample {
 	entropyServerURL := "https://entropy.malc.org.uk/entropy/"
-	resp, err := http.Get(entropyServerURL)
+	bitPath := fmt.Sprintf("%d", bits)
+	resp, err := http.Get(entropyServerURL + bitPath)
 	if err != nil {
 		panic(err)
 	}
@@ -60,6 +66,26 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(sample)
-	fmt.Println(sample.validate())
+	return &sample
+}
+
+func fillPool(data []byte, fd int) {
+	fmt.Println(fd)
+	_, err := syscall.Write(fd, data)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func main() {
+	// fd, err := syscall.Open("/dev/random", syscall.O_RDWR, 666)
+	fd, err := syscall.Open("/tmp/random", syscall.O_RDWR, 666)
+	if err != nil {
+		panic(err)
+	}
+	defer syscall.Close(fd)
+	sample := fetchEntropy(4096)
+	if sample.validate() {
+		fillPool(sample.getData(), fd)
+	}
 }
