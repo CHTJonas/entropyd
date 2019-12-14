@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"syscall"
+	"unsafe"
 )
 
 type Sample struct {
@@ -15,6 +16,14 @@ type Sample struct {
 
 func (sample *Sample) validate() bool {
 	return sample.Entropy.validate()
+}
+
+func (sample *Sample) getSize() int {
+	return sample.Entropy.getSize()
+}
+
+func (sample *Sample) getBits() int {
+	return sample.Entropy.getBits()
 }
 
 func (sample *Sample) getData() []byte {
@@ -28,6 +37,14 @@ type Entropy struct {
 	Magic   int    `json:"random_magic"`
 	Source  string `json:"source"`
 	Version int    `json:"version"`
+}
+
+func (entropy *Entropy) getSize() int {
+	return entropy.Length
+}
+
+func (entropy *Entropy) getBits() int {
+	return entropy.Bits
 }
 
 func (entropy *Entropy) getData() []byte {
@@ -47,6 +64,12 @@ func (entropy *Entropy) validate() bool {
 		return false
 	}
 	return true
+}
+
+type rand_pool_info struct {
+	entropy_count int
+	buf_size      int
+	buf           []byte
 }
 
 func fetchEntropy(bits uint) *Sample {
@@ -69,23 +92,28 @@ func fetchEntropy(bits uint) *Sample {
 	return &sample
 }
 
-func fillPool(data []byte, fd int) {
-	fmt.Println(fd)
-	_, err := syscall.Write(fd, data)
-	if err != nil {
+func addEntropy(sample *Sample, fd int) {
+	RNDADDENTROPY := 0x40085203
+	arg := unsafe.Pointer(&rand_pool_info{
+		entropy_count: sample.getBits(),
+		buf_size:      sample.getSize(),
+		buf:           sample.getData(),
+	})
+	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), uintptr(RNDADDENTROPY), uintptr(arg))
+	if ep != 0 {
+		err := syscall.Errno(ep)
 		panic(err)
 	}
 }
 
 func main() {
-	// fd, err := syscall.Open("/dev/random", syscall.O_RDWR, 666)
-	fd, err := syscall.Open("/tmp/random", syscall.O_RDWR, 666)
+	fd, err := syscall.Open("/dev/random", syscall.O_RDWR, 666)
 	if err != nil {
 		panic(err)
 	}
 	defer syscall.Close(fd)
 	sample := fetchEntropy(4096)
 	if sample.validate() {
-		fillPool(sample.getData(), fd)
+		addEntropy(sample, fd)
 	}
 }
