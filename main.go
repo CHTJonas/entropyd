@@ -66,10 +66,10 @@ func (entropy *Entropy) validate() bool {
 	return true
 }
 
-type rand_pool_info struct {
-	entropy_count int
-	buf_size      int
-	buf           []byte
+type randPoolInfo struct {
+	entropyCount int
+	bufSize      int
+	buf          []byte
 }
 
 func fetchEntropy(bits uint) *Sample {
@@ -94,10 +94,10 @@ func fetchEntropy(bits uint) *Sample {
 
 func addEntropy(sample *Sample, fd int) {
 	RNDADDENTROPY := 0x40085203
-	arg := unsafe.Pointer(&rand_pool_info{
-		entropy_count: sample.getBits(),
-		buf_size:      sample.getSize(),
-		buf:           sample.getData(),
+	arg := unsafe.Pointer(&randPoolInfo{
+		entropyCount: sample.getBits(),
+		bufSize:      sample.getSize(),
+		buf:          sample.getData(),
 	})
 	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), uintptr(RNDADDENTROPY), uintptr(arg))
 	if ep != 0 {
