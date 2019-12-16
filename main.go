@@ -72,8 +72,10 @@ type randPoolInfo struct {
 	buf          []byte
 }
 
+const entropyServerURL = "https://entropy.malc.org.uk/entropy/"
+const rndAddEntropy = 0x40085203
+
 func fetchEntropy(bits uint) *Sample {
-	entropyServerURL := "https://entropy.malc.org.uk/entropy/"
 	bitPath := fmt.Sprintf("%d", bits)
 	resp, err := http.Get(entropyServerURL + bitPath)
 	if err != nil {
@@ -93,13 +95,12 @@ func fetchEntropy(bits uint) *Sample {
 }
 
 func addEntropy(sample *Sample, fd int) {
-	RNDADDENTROPY := 0x40085203
 	arg := unsafe.Pointer(&randPoolInfo{
 		entropyCount: sample.getBits(),
 		bufSize:      sample.getSize(),
 		buf:          sample.getData(),
 	})
-	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), uintptr(RNDADDENTROPY), uintptr(arg))
+	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), uintptr(rndAddEntropy), uintptr(arg))
 	if ep != 0 {
 		err := syscall.Errno(ep)
 		panic(err)
