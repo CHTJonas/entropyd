@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -75,7 +79,7 @@ type randPoolInfo struct {
 const entropyServerURL = "https://entropy.malc.org.uk/entropy/"
 const rndAddEntropy = 0x40085203
 
-func fetchEntropy(bits uint) *Sample {
+func fetchEntropy(bits int) *Sample {
 	bitPath := fmt.Sprintf("%d", bits)
 	resp, err := http.Get(entropyServerURL + bitPath)
 	if err != nil {
@@ -107,14 +111,57 @@ func addEntropy(sample *Sample, fd int) {
 	}
 }
 
+func getEntropyAvail() int {
+	path := "/proc/sys/kernel/random/entropy_avail"
+	return readIntFromFile(path)
+}
+
+func getWriteWakeupThreshold() int {
+	path := "/proc/sys/kernel/random/write_wakeup_threshold"
+	return readIntFromFile(path)
+}
+
+func getPoolsize() int {
+	path := "/proc/sys/kernel/random/poolsize"
+	return readIntFromFile(path)
+}
+
+func readIntFromFile(path string) int {
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	i, err := strconv.Atoi(scanner.Text())
+
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+
 func main() {
 	fd, err := syscall.Open("/dev/random", syscall.O_RDWR, 666)
 	if err != nil {
 		panic(err)
 	}
 	defer syscall.Close(fd)
-	sample := fetchEntropy(4096)
-	if sample.validate() {
-		addEntropy(sample, fd)
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			entropyAvail := getEntropyAvail()
+			writeWakeupThreshold := getWriteWakeupThreshold()
+			if entropyAvail < writeWakeupThreshold {
+				poolsize := getPoolsize()
+				bitsNeeded := poolsize - entropyAvail
+				sample := fetchEntropy(bitsNeeded)
+				if sample.validate() {
+					addEntropy(sample, fd)
+				}
+			}
+		}
 	}
 }
