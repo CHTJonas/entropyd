@@ -79,11 +79,19 @@ type randPoolInfo struct {
 
 const entropyServerURL = "https://entropy.malc.org.uk/entropy/"
 const rndAddEntropy = 0x40085203
+const minBits = 512
+const maxBits = 8192
 
 func fetchEntropy(bits int) *Sample {
-	bytes := int(math.Ceil(float64(bits) / float64(8)))
-	bitPath := fmt.Sprintf("%d", bytes*8)
-	resp, err := http.Get(entropyServerURL + bitPath)
+	bits = int(math.Ceil(float64(bits)/float64(8))) * 8
+	if bits < minBits {
+		bits = minBits
+	}
+	if bits > maxBits {
+		bits = maxBits
+	}
+	path := fmt.Sprintf("%d", bits)
+	resp, err := http.Get(entropyServerURL + path)
 	if err != nil {
 		panic(err)
 	}
