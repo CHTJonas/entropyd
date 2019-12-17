@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -80,7 +81,8 @@ const entropyServerURL = "https://entropy.malc.org.uk/entropy/"
 const rndAddEntropy = 0x40085203
 
 func fetchEntropy(bits int) *Sample {
-	bitPath := fmt.Sprintf("%d", bits)
+	bytes := int(math.Ceil(float64(bits) / float64(8)))
+	bitPath := fmt.Sprintf("%d", bytes*8)
 	resp, err := http.Get(entropyServerURL + bitPath)
 	if err != nil {
 		panic(err)
