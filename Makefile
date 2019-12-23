@@ -7,15 +7,15 @@ export GOARCH=amd64
 export GOOS=linux
 
 dir:
-	@if [ ! -d $(CURDIR)/bin ] ; then mkdir -p $(CURDIR)/bin ; fi
+	@if [ ! -d bin ] ; then mkdir -p bin ; fi
 
 format:
-	$(GOFMT) main.go
+	$(GOFMT) ./...
 
 build:
-	$(GOBUILD) -o $(CURDIR)/bin/entropyd main.go
+	$(GOBUILD) -o bin/entropyd cmd/entropyd/main.go
 
 clean:
-	@rm -rf $(CURDIR)/bin
+	@rm -rf bin
 
 all: dir format build
