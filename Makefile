@@ -1,3 +1,6 @@
+SHELL := bash
+.ONESHELL:
+
 GO=$(shell which go)
 GOGET=$(GO) get
 GOFMT=$(GO) fmt
