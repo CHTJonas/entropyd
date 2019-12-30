@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (client *EntropyClient) FetchEntropy(bits int) *Sample {
+func (client *EntropyClient) FetchEntropy(bits int) (*Sample, error) {
 	bits = int(math.Ceil(float64(bits)/float64(8))) * 8
 	if bits < client.minBits {
 		bits = client.minBits
@@ -19,17 +19,17 @@ func (client *EntropyClient) FetchEntropy(bits int) *Sample {
 	path := fmt.Sprintf("%d", bits)
 	resp, err := http.Get(client.serverURL + path)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var sample Sample
 	err = json.Unmarshal(body, &sample)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &sample
+	return &sample, nil
 }

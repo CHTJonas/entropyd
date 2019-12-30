@@ -29,16 +29,22 @@ func main() {
 				poolsize := pool.GetPoolsize()
 				bitsNeeded := poolsize - entropyAvail
 
-				fmt.Println(entropyAvail)
-				fmt.Println(writeWakeupThreshold)
-				fmt.Println(bitsNeeded)
+				fmt.Println("Available entropy:", entropyAvail)
+				fmt.Println("Target entropy:", poolsize)
+				fmt.Println("Difference:", bitsNeeded)
 
-				sample := cl.FetchEntropy(bitsNeeded)
-				if sample.Validate() {
-					pl.AddEntropy(sample)
+				sample, err := cl.FetchEntropy(bitsNeeded)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if sample.Validate() {
+						pl.AddEntropy(sample)
+					} else {
+						fmt.Println("Entropy sample failed validation")
+					}
 				}
 
-				fmt.Println("")
+				fmt.Println()
 			}
 		}
 	}
