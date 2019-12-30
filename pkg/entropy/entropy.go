@@ -1,6 +1,9 @@
 package entropy
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+	"errors"
+)
 
 type Entropy struct {
 	Data    string `json:"data_b64"`
@@ -27,13 +30,13 @@ func (entropy *Entropy) GetData() []byte {
 	return decoded
 }
 
-func (entropy *Entropy) Validate() bool {
+func (entropy *Entropy) Validate() error {
 	data := entropy.GetData()
 	if len(data) != entropy.Length {
-		return false
+		return errors.New("Bad data length")
 	}
 	if 8*len(data) < entropy.Bits {
-		return false
+		return errors.New("Server claims impossibly-good entropy quality")
 	}
-	return true
+	return nil
 }

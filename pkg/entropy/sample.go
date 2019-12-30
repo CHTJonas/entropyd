@@ -16,6 +16,6 @@ func (sample *Sample) GetData() []byte {
 	return sample.Entropy.GetData()
 }
 
-func (sample *Sample) Validate() bool {
+func (sample *Sample) Validate() error {
 	return sample.Entropy.Validate()
 }

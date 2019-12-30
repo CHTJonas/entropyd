@@ -37,10 +37,11 @@ func main() {
 				if err != nil {
 					fmt.Println(err)
 				} else {
-					if sample.Validate() {
-						pl.AddEntropy(sample)
+					err := sample.Validate()
+					if err != nil {
+						fmt.Println(err)
 					} else {
-						fmt.Println("Entropy sample failed validation")
+						pl.AddEntropy(sample)
 					}
 				}
 
