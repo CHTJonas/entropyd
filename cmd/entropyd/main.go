@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"time"
 
@@ -8,12 +9,13 @@ import (
 	"github.com/chtjonas/entropy-client/pkg/pool"
 )
 
-const serverURL = "https://entropy.malc.org.uk/entropy/"
-const minBits = 512
-const maxBits = 8192
-
 func main() {
-	cl := entropy.NewClient(serverURL, minBits, maxBits)
+	serverURLPtr := flag.String("url", "https://entropy.malc.org.uk/entropy/", "URL of the remote entropy server")
+	minBitsPtr := flag.Int("min", 512, "minimum amount of entropy (in bits) to call for in a single HTTP request")
+	maxBitsPtr := flag.Int("max", 8192, "maximum amount of entropy (in bits) to call for in a single HTTP request")
+	flag.Parse()
+
+	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 
