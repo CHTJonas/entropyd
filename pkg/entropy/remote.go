@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
-	"net/http"
 )
 
 func (client *EntropyClient) FetchEntropy(bits int) (*Sample, error) {
@@ -17,7 +16,7 @@ func (client *EntropyClient) FetchEntropy(bits int) (*Sample, error) {
 		bits = client.maxBits
 	}
 	path := fmt.Sprintf("%d", bits)
-	resp, err := http.Get(client.serverURL + path)
+	resp, err := client.client.Get(client.serverURL + path)
 	if err != nil {
 		return nil, err
 	}
