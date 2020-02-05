@@ -12,6 +12,12 @@ dir:
 format:
 	$(GOFMT) ./...
 
+build/arm:
+	export GOOS=linux
+	export GOARCH=arm
+	export GOARM=7
+	$(GOBUILD) -o bin/linux-arm/entropyd cmd/entropyd/main.go
+
 build/arm64:
 	export GOOS=linux
 	export GOARCH=arm64
@@ -22,7 +28,7 @@ build/amd64:
 	export GOARCH=amd64
 	$(GOBUILD) -o bin/linux-amd64/entropyd cmd/entropyd/main.go
 
-build: build/arm64 build/amd64
+build: build/arm build/arm64 build/amd64
 
 clean:
 	@rm -rf bin
