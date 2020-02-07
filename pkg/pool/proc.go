@@ -16,7 +16,7 @@ func GetWriteWakeupThreshold() int {
 	return readIntFromFile(path)
 }
 
-func GetPoolsize() int {
+func GetPoolSize() int {
 	path := "/proc/sys/kernel/random/poolsize"
 	return readIntFromFile(path)
 }

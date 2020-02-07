@@ -28,13 +28,9 @@ func main() {
 			entropyAvail := pool.GetEntropyAvail()
 			writeWakeupThreshold := pool.GetWriteWakeupThreshold()
 			if entropyAvail < writeWakeupThreshold {
-				poolsize := pool.GetPoolsize()
-				bitsNeeded := poolsize - entropyAvail
-
-				fmt.Println("Available entropy:", entropyAvail)
-				fmt.Println("Target entropy:", poolsize)
-				fmt.Println("Difference:", bitsNeeded)
-
+				poolSize := pool.GetPoolSize()
+				bitsNeeded := poolSize - entropyAvail
+				fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy delta: %d.\n", entropyAvail, poolSize, bitsNeeded)
 				sample, err := cl.FetchEntropy(bitsNeeded)
 				if err != nil {
 					fmt.Println(err)
@@ -46,8 +42,6 @@ func main() {
 						pl.AddEntropy(sample)
 					}
 				}
-
-				fmt.Println()
 			}
 		}
 	}
