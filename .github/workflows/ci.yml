@@ -1,0 +1,25 @@
+name: CI
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Set up Go development environment
+        uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.8'
+      - name: Build artefacts
+        run: |
+          sudo mkdir -p /home/runner/go/src/github.com/chtjonas
+          sudo cp -a $GITHUB_WORKSPACE /home/runner/go/src/github.com/chtjonas/entropy-client
+          cd /home/runner/go/src/github.com/chtjonas/entropy-client
+          make clean && make all
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: builds
+          path: /home/runner/go/src/github.com/chtjonas/entropy-client/bin
