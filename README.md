@@ -14,6 +14,8 @@ make clean && make build
 
 ```
 Usage of entropyd:
+  -dry-run
+        makes a request for 512 bits of entropy but does not mix in to the kernel entropy pool
   -max int
         maximum amount of entropy (in bits) in a HTTP request (default 8192)
   -min int
