@@ -19,7 +19,7 @@ jobs:
           cd /home/runner/go/src/github.com/chtjonas/entropy-client
           make clean && make all
       - name: Upload artefacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2-preview
         with:
-          name: builds
-          path: /home/runner/go/src/github.com/chtjonas/entropy-client/bin
+          name: entropyd
+          path: /home/runner/go/src/github.com/chtjonas/entropy-client/bin/*/*
