@@ -36,6 +36,9 @@ func (client *EntropyClient) RequestFromServer(bits int) ([]byte, error) {
 	if err != nil {
 
 	}
+	if client.userAgent != "" {
+		req.Header.Set("User-Agent", client.userAgent)
+	}
 	resp, err := httpclient.Do(req)
 	if err != nil {
 		return nil, err

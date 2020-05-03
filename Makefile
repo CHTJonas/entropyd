@@ -16,17 +16,17 @@ build/arm:
 	export GOOS=linux
 	export GOARCH=arm
 	export GOARM=7
-	$(GOBUILD) -o bin/linux-arm/entropyd cmd/entropyd/main.go
+	$(GOBUILD) -o bin/linux-arm/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
 
 build/arm64:
 	export GOOS=linux
 	export GOARCH=arm64
-	$(GOBUILD) -o bin/linux-arm64/entropyd cmd/entropyd/main.go
+	$(GOBUILD) -o bin/linux-arm64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
 
 build/amd64:
 	export GOOS=linux
 	export GOARCH=amd64
-	$(GOBUILD) -o bin/linux-amd64/entropyd cmd/entropyd/main.go
+	$(GOBUILD) -o bin/linux-amd64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
 
 build: build/arm build/arm64 build/amd64
 

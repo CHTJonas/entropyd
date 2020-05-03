@@ -10,10 +10,11 @@ type EntropyClient struct {
 	serverURL string
 	minBits   int
 	maxBits   int
+	userAgent string
 	client    *http.Client
 }
 
-func NewClient(serverURL string, minBits int, maxBits int) *EntropyClient {
+func NewClient(serverURL string, minBits int, maxBits int, userAgent string) *EntropyClient {
 	tlsconf := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		PreferServerCipherSuites: false,
@@ -36,6 +37,7 @@ func NewClient(serverURL string, minBits int, maxBits int) *EntropyClient {
 		serverURL: serverURL,
 		minBits:   minBits,
 		maxBits:   maxBits,
+		userAgent: userAgent,
 		client:    cl,
 	}
 }

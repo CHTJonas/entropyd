@@ -18,7 +18,9 @@ func main() {
 	doDryRunPtr := flag.Bool("dry-run", false, "makes a request for 512 bits of entropy but does not mix in to the kernel entropy pool")
 	flag.Parse()
 
-	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr)
+	ver := getVer().getString()
+	ua := "entropy-client/" + ver + " (+https://github.com/CHTJonas/entropy-client)"
+	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 
