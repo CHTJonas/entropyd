@@ -75,10 +75,9 @@ func (pool *EntropyPool) GetPoolSize() int {
 	return readIntFromFd(pool.sizeFd)
 }
 
-func (pool *EntropyPool) GetBitsNeeded(maxBits int) int {
+func (pool *EntropyPool) GetBitsNeeded(entropyTarget int, maxBits int) int {
 	entropyAvailable := pool.GetEntropyAvail()
 	poolCapacity := pool.GetPoolSize()
-	entropyTarget := poolCapacity * 6 / 7
 	bitsNeeded := computeBitsNeeded(entropyAvailable, entropyTarget, poolCapacity, maxBits)
 	fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, entropyTarget, bitsNeeded)
 	return bitsNeeded
