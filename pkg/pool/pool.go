@@ -90,15 +90,16 @@ func (pool *EntropyPool) GetBitsNeeded(maxBits int) int {
 func computeBitsNeeded(entropyAvailable int, entropyTarget int, poolCapacity int, maxBits int) int {
 	bitsWanted := 0
 	for {
-		bits := float64(4*(entropyTarget-entropyAvailable)*poolCapacity) / float64(3*(poolCapacity-entropyAvailable))
+		bitsThisRound := float64(4*(entropyTarget-entropyAvailable)*poolCapacity) / float64(3*(poolCapacity-entropyAvailable))
+		// Linux only adds half a pool at once, to compensate for wonky simplified formulae.
+		if bitsThisRound <= float64(poolCapacity)/2 {
+			return int(math.Min(math.Ceil(bitsThisRound+float64(bitsWanted)), float64(maxBits)))
+		}
+		// Pretend we added poolCapacity / 2 and go around again
+		bitsWanted += poolCapacity / 2
 		if bitsWanted >= maxBits {
 			return maxBits
 		}
-		if bits <= float64(poolCapacity)/2 {
-			return int(math.Ceil(bits + float64(bitsWanted)))
-		}
-		// Pretend we added poolCapacity / 2 and go around again
-		bitsWanted = poolCapacity / 2
 		entropyAvailable += 3 * (poolCapacity - entropyAvailable) / 8
 	}
 }
