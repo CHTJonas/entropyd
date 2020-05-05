@@ -40,12 +40,10 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			entropyAvail := pool.GetEntropyAvail()
-			writeWakeupThreshold := pool.GetWriteWakeupThreshold()
+			entropyAvail := pl.GetEntropyAvail()
+			writeWakeupThreshold := pl.GetWriteWakeupThreshold()
 			if entropyAvail < writeWakeupThreshold {
-				poolSize := pool.GetPoolSize()
-				bitsNeeded := poolSize - entropyAvail
-				fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy delta: %d.\n", entropyAvail, poolSize, bitsNeeded)
+				bitsNeeded := pl.GetBitsNeeded(*maxBitsPtr)
 				sample, err := cl.FetchEntropy(bitsNeeded)
 				if err != nil {
 					fmt.Println(err)

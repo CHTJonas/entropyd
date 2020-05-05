@@ -23,7 +23,7 @@ func (pool *EntropyPool) AddEntropy(sample *entropy.Sample) {
 		bufSize:      sample.GetSize(),
 		buf:          sample.GetData(),
 	})
-	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.fd), uintptr(rndAddEntropy), uintptr(arg))
+	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(rndAddEntropy), uintptr(arg))
 	if ep != 0 {
 		err := syscall.Errno(ep)
 		panic(err)
