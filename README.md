@@ -13,15 +13,19 @@ make clean && make build
 ## Usage
 
 ```
+$ entropyd --help
+
 Usage of entropyd:
   -dry-run
-        makes a request for 512 bits of entropy but does not mix in to the kernel entropy pool
+        makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool
   -max int
-        maximum amount of entropy (in bits) in a HTTP request (default 8192)
+        maximum amount of entropy (in bits) in a HTTP request (default 8128)
   -min int
-        minimum amount of entropy (in bits) in a HTTP request (default 512)
+        minimum amount of entropy (in bits) in a HTTP request (default 64)
   -poll int
         interval (in milliseconds) at which to poll the kernel entropy pool (default 200)
+  -target int
+        target amount of entropy (in bits) to store in the kernel entropy pool (default 3072)
   -url string
         URL of the remote entropy server (default "https://entropy.malc.org.uk/entropy/")
 ```

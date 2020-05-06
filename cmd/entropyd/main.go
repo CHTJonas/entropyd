@@ -22,7 +22,7 @@ func main() {
 	maxBitsPtr := flag.Int("max", maxReqBits, "maximum amount of entropy (in bits) in a HTTP request")
 	targetBitsPtr := flag.Int("target", 3072, "target amount of entropy (in bits) to store in the kernel entropy pool")
 	pollIntervalPtr := flag.Int("poll", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
-	doDryRunPtr := flag.Bool("dry-run", false, "makes a request for 512 bits of entropy but does not mix in to the kernel entropy pool")
+	doDryRunPtr := flag.Bool("dry-run", false, "makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool")
 	flag.Parse()
 
 	ver := getVer().getString()
