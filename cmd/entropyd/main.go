@@ -50,7 +50,8 @@ func main() {
 			entropyAvail := pl.GetEntropyAvail()
 			writeWakeupThreshold := pl.GetWriteWakeupThreshold()
 			if entropyAvail < writeWakeupThreshold {
-				bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
+				entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
+				fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, *targetBitsPtr, bitsNeeded)
 				sample, err := cl.FetchEntropy(bitsNeeded)
 				if err != nil {
 					fmt.Println(err)

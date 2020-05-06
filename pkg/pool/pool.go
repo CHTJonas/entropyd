@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -40,7 +39,6 @@ func getFd(path string, mode int, perm uint32) int {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("FD for %s is %d\n", path, fd)
 	return fd
 }
 
@@ -50,7 +48,6 @@ func readIntFromFd(fd int) int {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Read %d bytes from %d: %s", n, fd, buffer)
 	str := strings.ReplaceAll(string(buffer[:n]), "\n", "")
 	i, err := strconv.Atoi(str)
 	if err != nil {
@@ -75,12 +72,11 @@ func (pool *EntropyPool) GetPoolSize() int {
 	return readIntFromFd(pool.sizeFd)
 }
 
-func (pool *EntropyPool) GetBitsNeeded(entropyTarget int, maxBits int) int {
+func (pool *EntropyPool) GetBitsNeeded(entropyTarget int, maxBits int) (int, int) {
 	entropyAvailable := pool.GetEntropyAvail()
 	poolCapacity := pool.GetPoolSize()
 	bitsNeeded := computeBitsNeeded(entropyAvailable, entropyTarget, poolCapacity, maxBits)
-	fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, entropyTarget, bitsNeeded)
-	return bitsNeeded
+	return entropyAvailable, bitsNeeded
 }
 
 // ComputeBitsNeeded reverses the kernel's asymptotic algorithm to determine how much entropy
