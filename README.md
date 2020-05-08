@@ -2,6 +2,8 @@
 
 This repository hosts the code for a simple client application to seed the Linux kernel with entropy from a remote server via HTTP. It attempts to adhere to the UNIX philosophy of doing one thing and doing it well.
 
+This project is a Go rewrite of [entropyserver](https://bitbucket.org/mas90/entropyserver) by Malcolm Scott. Much of the original credit for code logic must go to him.
+
 ## Build
 
 To compile the code execute the following in a terminal. This will produce three `entropyd` binaries for the `arm`, `arm64` and `amd64` architectures in different directories under `bin`.
