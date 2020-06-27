@@ -23,12 +23,17 @@ build/arm64:
 	export GOARCH=arm64
 	$(GOBUILD) -o bin/linux-arm64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
 
+build/i386:
+	export GOOS=linux
+	export GOARCH=386
+	$(GOBUILD) -o bin/linux-i386/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
+
 build/amd64:
 	export GOOS=linux
 	export GOARCH=amd64
 	$(GOBUILD) -o bin/linux-amd64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
 
-build: build/arm build/arm64 build/amd64
+build: build/arm build/arm64 build/i386 build/amd64
 
 clean:
 	@rm -rf bin
