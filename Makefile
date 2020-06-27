@@ -12,28 +12,28 @@ dir:
 format:
 	$(GOFMT) ./...
 
-build/arm:
+build/armv7:
 	export GOOS=linux
 	export GOARCH=arm
 	export GOARM=7
-	$(GOBUILD) -o bin/linux-arm/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
+	$(GOBUILD) -o bin/entropyd-armv7 cmd/entropyd/main.go cmd/entropyd/version.go
 
 build/arm64:
 	export GOOS=linux
 	export GOARCH=arm64
-	$(GOBUILD) -o bin/linux-arm64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
+	$(GOBUILD) -o bin/entropyd-arm64 cmd/entropyd/main.go cmd/entropyd/version.go
 
-build/i386:
+build/386:
 	export GOOS=linux
 	export GOARCH=386
-	$(GOBUILD) -o bin/linux-i386/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
+	$(GOBUILD) -o bin/entropyd-386 cmd/entropyd/main.go cmd/entropyd/version.go
 
 build/amd64:
 	export GOOS=linux
 	export GOARCH=amd64
-	$(GOBUILD) -o bin/linux-amd64/entropyd cmd/entropyd/main.go cmd/entropyd/version.go
+	$(GOBUILD) -o bin/entropyd-amd64 cmd/entropyd/main.go cmd/entropyd/version.go
 
-build: build/arm build/arm64 build/i386 build/amd64
+build: build/armv7 build/arm64 build/386 build/amd64
 
 clean:
 	@rm -rf bin
