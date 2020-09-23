@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/chtjonas/entropy-client/pkg/entropy"
@@ -17,6 +18,8 @@ const maxDataBytes = 1016
 const maxReqBits = maxDataBytes * 8
 
 func main() {
+	checkOS()
+
 	serverURLPtr := flag.String("url", "https://entropy.malc.org.uk/entropy/", "URL of the remote entropy server")
 	minBitsPtr := flag.Int("min", 64, "minimum amount of entropy (in bits) in a HTTP request")
 	maxBitsPtr := flag.Int("max", maxReqBits, "maximum amount of entropy (in bits) in a HTTP request")
@@ -65,5 +68,12 @@ func main() {
 				}
 			}
 		}
+	}
+}
+
+func checkOS() {
+	if runtime.GOOS != "linux" {
+		fmt.Println("entropyd can only run on Linux")
+		os.Exit(1)
 	}
 }
