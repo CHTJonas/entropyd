@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/chtjonas/entropy-client/pkg/entropy"
-	"github.com/chtjonas/entropy-client/pkg/pool"
+	"github.com/chtjonas/entropyd/pkg/entropy"
+	"github.com/chtjonas/entropyd/pkg/pool"
 )
 
 // Limit of ioctl requests is 1024 bytes, including header.
@@ -29,7 +29,7 @@ func main() {
 	flag.Parse()
 
 	ver := getVer().getString()
-	ua := "entropy-client/" + ver + " (+https://github.com/CHTJonas/entropy-client)"
+	ua := "entropyd/" + ver + " (+https://github.com/CHTJonas/entropyd)"
 	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()

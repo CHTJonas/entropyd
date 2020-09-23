@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/chtjonas/entropy-client/pkg/entropy"
+	"github.com/chtjonas/entropyd/pkg/entropy"
 )
 
 type randPoolInfo struct {
