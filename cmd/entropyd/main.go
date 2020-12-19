@@ -20,6 +20,8 @@ const maxReqBits = maxDataBytes * 8
 func main() {
 	checkOS()
 
+	ipv4Ptr := flag.Bool("4", false, "force the use of IPv4 for the HTTP connection")
+	ipv6Ptr := flag.Bool("6", false, "force the use of IPv6 for the HTTP connection")
 	serverURLPtr := flag.String("url", "https://entropy.malc.org.uk/entropy/", "URL of the remote entropy server")
 	minBitsPtr := flag.Int("min", 64, "minimum amount of entropy (in bits) in a HTTP request")
 	maxBitsPtr := flag.Int("max", maxReqBits, "maximum amount of entropy (in bits) in a HTTP request")
@@ -30,7 +32,14 @@ func main() {
 
 	ver := getVer().getString()
 	ua := "entropyd/" + ver + " (+https://github.com/CHTJonas/entropyd)"
-	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua)
+	ipv := ""
+	if *ipv4Ptr {
+		ipv = "tcp4"
+	}
+	if *ipv6Ptr {
+		ipv = "tcp6"
+	}
+	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua, ipv)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 

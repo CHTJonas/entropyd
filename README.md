@@ -18,17 +18,19 @@ make clean && make build
 $ entropyd --help
 
 Usage of entropyd:
-  -dry-run
+  -4    force the use of IPv4 for the HTTP connection
+  -6    force the use of IPv6 for the HTTP connection
+  --dry-run
         makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool
-  -max int
+  --max int
         maximum amount of entropy (in bits) in a HTTP request (default 8128)
-  -min int
+  --min int
         minimum amount of entropy (in bits) in a HTTP request (default 64)
-  -poll int
+  --poll int
         interval (in milliseconds) at which to poll the kernel entropy pool (default 200)
-  -target int
+  --target int
         target amount of entropy (in bits) to store in the kernel entropy pool (default 3072)
-  -url string
+  --url string
         URL of the remote entropy server (default "https://entropy.malc.org.uk/entropy/")
 ```
 

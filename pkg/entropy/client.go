@@ -1,7 +1,9 @@
 package entropy
 
 import (
+	"context"
 	"crypto/tls"
+	"net"
 	"net/http"
 	"time"
 )
@@ -14,7 +16,7 @@ type EntropyClient struct {
 	client    *http.Client
 }
 
-func NewClient(serverURL string, minBits int, maxBits int, userAgent string) *EntropyClient {
+func NewClient(serverURL string, minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
 	tlsconf := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		PreferServerCipherSuites: false,
@@ -25,11 +27,24 @@ func NewClient(serverURL string, minBits int, maxBits int, userAgent string) *En
 			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 		},
 	}
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 10 * time.Second,
+	}
+	dialCtx := func(ctx context.Context, network, addr string) (net.Conn, error) {
+		if ipVersion != "" {
+			network = ipVersion
+		}
+		return dialer.DialContext(ctx, network, addr)
+	}
 	tr := &http.Transport{
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableCompression: true,
-		TLSClientConfig:    tlsconf,
+		MaxIdleConns:        10,
+		IdleConnTimeout:     10 * time.Minute,
+		TLSHandshakeTimeout: 10 * time.Second,
+		DisableKeepAlives:   false,
+		DisableCompression:  true,
+		TLSClientConfig:     tlsconf,
+		DialContext:         dialCtx,
 	}
 	cl := &http.Client{Transport: tr}
 
