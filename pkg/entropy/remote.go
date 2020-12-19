@@ -34,7 +34,7 @@ func (client *EntropyClient) RequestFromServer(bits int) ([]byte, error) {
 	url := client.serverURL + path
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-
+		return nil, err
 	}
 	if client.userAgent != "" {
 		req.Header.Set("User-Agent", client.userAgent)
