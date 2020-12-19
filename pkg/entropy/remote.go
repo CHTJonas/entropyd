@@ -36,6 +36,7 @@ func (client *EntropyClient) RequestFromServer(bits int) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Cache-Control", "no-store, max-age=0")
 	if client.userAgent != "" {
 		req.Header.Set("User-Agent", client.userAgent)
 	}
