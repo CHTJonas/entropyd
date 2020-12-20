@@ -55,25 +55,30 @@ func main() {
 	}
 
 	interval := time.Duration(*pollIntervalPtr)
-	ticker := time.NewTicker(interval * time.Millisecond)
-	for {
-		select {
-		case <-ticker.C:
-			entropyAvail := pl.GetEntropyAvail()
-			writeWakeupThreshold := pl.GetWriteWakeupThreshold()
-			if entropyAvail < writeWakeupThreshold {
-				entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
-				fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, *targetBitsPtr, bitsNeeded)
-				sample, err := cl.FetchEntropy(bitsNeeded)
+	backoff := make(chan interface{}, 6)
+
+	go func() {
+		for range time.Tick(2 * time.Second) {
+			<-backoff
+		}
+	}()
+
+	for range time.Tick(interval * time.Millisecond) {
+		entropyAvail := pl.GetEntropyAvail()
+		writeWakeupThreshold := pl.GetWriteWakeupThreshold()
+		if entropyAvail < writeWakeupThreshold {
+			entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
+			fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, *targetBitsPtr, bitsNeeded)
+			backoff <- nil
+			sample, err := cl.FetchEntropy(bitsNeeded)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				err := sample.Validate()
 				if err != nil {
 					fmt.Println(err)
 				} else {
-					err := sample.Validate()
-					if err != nil {
-						fmt.Println(err)
-					} else {
-						pl.AddEntropy(sample)
-					}
+					pl.AddEntropy(sample)
 				}
 			}
 		}

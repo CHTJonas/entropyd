@@ -15,7 +15,7 @@ func (v *ver) getString() string {
 func getVer() *ver {
 	return &ver{
 		Major: 1,
-		Minor: 5,
+		Minor: 6,
 		Patch: 0,
 	}
 }
