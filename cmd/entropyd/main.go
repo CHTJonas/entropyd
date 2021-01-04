@@ -21,6 +21,7 @@ const maxReqBits = maxDataBytes * 8
 var version = "dev-edge"
 
 func main() {
+	// We can only run on Linux.
 	checkOS()
 
 	verThenExit := flag.Bool("version", false, "print software version and exit")
@@ -56,6 +57,7 @@ func main() {
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 
+	// Perform an dry-run and exit if the user asked us to.
 	if *doDryRunPtr {
 		sample, err := cl.FetchEntropy(16)
 		if err != nil {
@@ -66,6 +68,11 @@ func main() {
 		fmt.Printf("Entropy: %s", data)
 		os.Exit(0)
 	}
+
+	log("entropyd started successfully",
+		logTuple{key: "path", value: os.Args[0]},
+		logTuple{key: "version", value: version},
+	)
 
 	interval := time.Duration(*pollIntervalPtr)
 	backoff := make(chan interface{}, 6)
@@ -81,16 +88,27 @@ func main() {
 		writeWakeupThreshold := pl.GetWriteWakeupThreshold()
 		if entropyAvail < writeWakeupThreshold {
 			entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
-			fmt.Printf("Entropy available: %d. Entropy target: %d. Entropy needed: %d.\n", entropyAvailable, *targetBitsPtr, bitsNeeded)
+			log("fetching entropy",
+				logTuple{key: "entropy_avail", value: fmt.Sprint(entropyAvailable)},
+				logTuple{key: "entropy_target", value: fmt.Sprint(*targetBitsPtr)},
+				logTuple{key: "bits_needed", value: fmt.Sprint(bitsNeeded)},
+			)
 			backoff <- nil
 			sample, err := cl.FetchEntropy(bitsNeeded)
 			if err != nil {
-				fmt.Println(err)
+				log("failed to fetch entropy",
+					logTuple{key: "error", value: err.Error()},
+				)
 			} else {
 				err := sample.Validate()
 				if err != nil {
-					fmt.Println(err)
+					log("failed to validate sample",
+						logTuple{key: "error", value: err.Error()},
+					)
 				} else {
+					log("adding entropy to kernel pool",
+						logTuple{key: "sample_size", value: fmt.Sprint(sample.GetBits())},
+					)
 					pl.AddEntropy(sample)
 				}
 			}
@@ -103,4 +121,17 @@ func checkOS() {
 		fmt.Println("entropyd can only run on Linux")
 		os.Exit(1)
 	}
+}
+
+type logTuple struct {
+	key   string
+	value string
+}
+
+func log(msg string, tuples ...logTuple) {
+	fmt.Printf("msg=%s", msg)
+	for _, v := range tuples {
+		fmt.Printf(", %s=%s", v.key, v.value)
+	}
+	fmt.Println()
 }

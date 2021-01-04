@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"fmt"
 	"syscall"
 	"unsafe"
 
@@ -17,7 +16,6 @@ type randPoolInfo struct {
 const rndAddEntropy = 0x40085203
 
 func (pool *EntropyPool) AddEntropy(sample *entropy.Sample) {
-	fmt.Println("Adding", sample.GetBits(), "bits of entropy")
 	arg := unsafe.Pointer(&randPoolInfo{
 		entropyCount: sample.GetBits(),
 		bufSize:      sample.GetSize(),
