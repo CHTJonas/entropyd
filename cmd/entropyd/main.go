@@ -20,10 +20,14 @@ const maxReqBits = maxDataBytes * 8
 // Software version defaults to the value below but is overridden by the compiler in Makefile.
 var version = "dev-edge"
 
-func main() {
-	// We can only run on Linux.
-	checkOS()
+func init() {
+	if runtime.GOOS != "linux" {
+		fmt.Println("entropyd can only run on Linux")
+		os.Exit(1)
+	}
+}
 
+func main() {
 	verThenExit := flag.Bool("version", false, "print software version and exit")
 	ipv4Ptr := flag.Bool("4", false, "force the use of IPv4 for the HTTP connection")
 	ipv6Ptr := flag.Bool("6", false, "force the use of IPv6 for the HTTP connection")
@@ -70,8 +74,8 @@ func main() {
 	}
 
 	log("entropyd started successfully",
-		logTuple{key: "path", value: os.Args[0]},
-		logTuple{key: "version", value: version},
+		logString("path", os.Args[0]),
+		logString("version", version),
 	)
 
 	interval := time.Duration(*pollIntervalPtr)
@@ -89,49 +93,29 @@ func main() {
 		if entropyAvail < writeWakeupThreshold {
 			entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
 			log("fetching entropy",
-				logTuple{key: "entropy_avail", value: fmt.Sprint(entropyAvailable)},
-				logTuple{key: "entropy_target", value: fmt.Sprint(*targetBitsPtr)},
-				logTuple{key: "bits_needed", value: fmt.Sprint(bitsNeeded)},
+				logInt("entropy_avail", entropyAvailable),
+				logInt("entropy_target", *targetBitsPtr),
+				logInt("bits_needed", bitsNeeded),
 			)
 			backoff <- nil
 			sample, err := cl.FetchEntropy(bitsNeeded)
 			if err != nil {
 				log("failed to fetch entropy",
-					logTuple{key: "error", value: err.Error()},
+					logError("error", err),
 				)
 			} else {
 				err := sample.Validate()
 				if err != nil {
 					log("failed to validate sample",
-						logTuple{key: "error", value: err.Error()},
+						logError("error", err),
 					)
 				} else {
 					log("adding entropy to kernel pool",
-						logTuple{key: "sample_size", value: fmt.Sprint(sample.GetBits())},
+						logInt("sample_size", sample.GetBits()),
 					)
 					pl.AddEntropy(sample)
 				}
 			}
 		}
 	}
-}
-
-func checkOS() {
-	if runtime.GOOS != "linux" {
-		fmt.Println("entropyd can only run on Linux")
-		os.Exit(1)
-	}
-}
-
-type logTuple struct {
-	key   string
-	value string
-}
-
-func log(msg string, tuples ...logTuple) {
-	fmt.Printf("msg=%s", msg)
-	for _, v := range tuples {
-		fmt.Printf(", %s=%s", v.key, v.value)
-	}
-	fmt.Println()
 }
