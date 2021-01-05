@@ -13,22 +13,26 @@ format:
 	$(GOFMT) ./...
 
 build/armv7:
+	export CGO_ENABLED=0
 	export GOOS=linux
 	export GOARCH=arm
 	export GOARM=7
 	$(GOBUILD) -o bin/entropyd-$(VER:v%=%)-armv7 cmd/entropyd/*
 
 build/arm64:
+	export CGO_ENABLED=0
 	export GOOS=linux
 	export GOARCH=arm64
 	$(GOBUILD) -o bin/entropyd-$(VER:v%=%)-arm64 cmd/entropyd/*
 
 build/386:
+	export CGO_ENABLED=0
 	export GOOS=linux
 	export GOARCH=386
 	$(GOBUILD) -o bin/entropyd-$(VER:v%=%)-386 cmd/entropyd/*
 
 build/amd64:
+	export CGO_ENABLED=0
 	export GOOS=linux
 	export GOARCH=amd64
 	$(GOBUILD) -o bin/entropyd-$(VER:v%=%)-amd64 cmd/entropyd/*
