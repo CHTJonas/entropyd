@@ -37,6 +37,6 @@ Usage of entropyd:
 ## Copyright
 
 Copyright (c) 2018 Malcolm Scott.\
-Copyright (c) 2019–2020 Charlie Jonas.\
+Copyright (c) 2019–2021 Charlie Jonas.\
 The code here is released under Version 2 of the GNU General Public License.\
 See the LICENSE file for full details.
