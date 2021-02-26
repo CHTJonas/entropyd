@@ -30,8 +30,6 @@ Usage of entropyd:
         interval (in milliseconds) at which to poll the kernel entropy pool (default 200)
   --target int
         target amount of entropy (in bits) to store in the kernel entropy pool (default 3072)
-  --url string
-        URL of the remote entropy server (default "https://entropy.malc.org.uk/entropy/")
 ```
 
 ## Copyright

@@ -32,7 +32,6 @@ func main() {
 	verThenExit := flag.Bool("version", false, "print software version and exit")
 	ipv4Ptr := flag.Bool("4", false, "force the use of IPv4 for the HTTP connection")
 	ipv6Ptr := flag.Bool("6", false, "force the use of IPv6 for the HTTP connection")
-	serverURLPtr := flag.String("url", "https://entropy.malc.org.uk/entropy/", "URL of the remote entropy server")
 	minBitsPtr := flag.Int("min", 64, "minimum amount of entropy (in bits) in a HTTP request")
 	maxBitsPtr := flag.Int("max", maxReqBits, "maximum amount of entropy (in bits) in a HTTP request")
 	targetBitsPtr := flag.Int("target", 3072, "target amount of entropy (in bits) to store in the kernel entropy pool")
@@ -58,7 +57,7 @@ func main() {
 	}
 
 	// Instantiate the actual entropy client and open the Linux kernel entropy pool.
-	cl := malc.NewEntropyClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua, ipv)
+	cl := malc.NewEntropyClient(*minBitsPtr, *maxBitsPtr, ua, ipv)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 

@@ -25,7 +25,7 @@ func (client *EntropyClient) FetchEntropy(bits int) (*pool.Entropy, error) {
 }
 
 func (client *EntropyClient) requestFromServer(bits int) ([]byte, error) {
-	url := fmt.Sprintf("%s%d", client.serverURL, bits)
+	url := fmt.Sprintf("%s%d", ServerURL, bits)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

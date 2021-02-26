@@ -8,15 +8,16 @@ import (
 	"time"
 )
 
+const ServerURL = "https://entropy.malc.org.uk/entropy/"
+
 type EntropyClient struct {
-	serverURL string
 	minBits   int
 	maxBits   int
 	userAgent string
 	client    *http.Client
 }
 
-func NewEntropyClient(serverURL string, minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
+func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
 	tlsconf := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		PreferServerCipherSuites: false,
@@ -49,7 +50,6 @@ func NewEntropyClient(serverURL string, minBits int, maxBits int, userAgent, ipV
 	cl := &http.Client{Transport: tr}
 
 	return &EntropyClient{
-		serverURL: serverURL,
 		minBits:   minBits,
 		maxBits:   maxBits,
 		userAgent: userAgent,
