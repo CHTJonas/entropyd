@@ -1,4 +1,4 @@
-package entropy
+package malc
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type EntropyClient struct {
 	client    *http.Client
 }
 
-func NewClient(serverURL string, minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
+func NewEntropyClient(serverURL string, minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
 	tlsconf := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		PreferServerCipherSuites: false,

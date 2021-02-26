@@ -7,8 +7,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/chtjonas/entropyd/pkg/entropy"
+	"github.com/chtjonas/entropyd/pkg/logging"
 	"github.com/chtjonas/entropyd/pkg/pool"
+	"github.com/chtjonas/entropyd/pkg/providers/malc"
 )
 
 // Limit of ioctl requests is 1024 bytes, including header.
@@ -56,66 +57,27 @@ func main() {
 		ipv = "tcp6"
 	}
 
-	// Instantiate the actual entropy client.
-	cl := entropy.NewClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua, ipv)
+	// Instantiate the actual entropy client and open the Linux kernel entropy pool.
+	cl := malc.NewEntropyClient(*serverURLPtr, *minBitsPtr, *maxBitsPtr, ua, ipv)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 
 	// Perform an dry-run and exit if the user asked us to.
 	if *doDryRunPtr {
-		sample, err := cl.FetchEntropy(16)
+		entropy, err := cl.FetchEntropy(16)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		data := sample.GetData()
-		fmt.Printf("Entropy: %s", data)
+		fmt.Printf("Entropy: %s", entropy.Data)
 		os.Exit(0)
 	}
 
-	log("entropyd started successfully",
-		logString("path", os.Args[0]),
-		logString("version", version),
+	logging.Log("entropyd started successfully",
+		logging.LogString("path", os.Args[0]),
+		logging.LogString("version", version),
 	)
 
 	interval := time.Duration(*pollIntervalPtr)
-	backoff := make(chan interface{}, 6)
-
-	go func() {
-		for range time.Tick(2 * time.Second) {
-			<-backoff
-		}
-	}()
-
-	for range time.Tick(interval * time.Millisecond) {
-		entropyAvail := pl.GetEntropyAvail()
-		writeWakeupThreshold := pl.GetWriteWakeupThreshold()
-		if entropyAvail < writeWakeupThreshold {
-			entropyAvailable, bitsNeeded := pl.GetBitsNeeded(*targetBitsPtr, *maxBitsPtr)
-			log("fetching entropy",
-				logInt("entropy_avail", entropyAvailable),
-				logInt("entropy_target", *targetBitsPtr),
-				logInt("bits_needed", bitsNeeded),
-			)
-			backoff <- nil
-			sample, err := cl.FetchEntropy(bitsNeeded)
-			if err != nil {
-				log("failed to fetch entropy",
-					logError("error", err),
-				)
-			} else {
-				err := sample.Validate()
-				if err != nil {
-					log("failed to validate sample",
-						logError("error", err),
-					)
-				} else {
-					log("adding entropy to kernel pool",
-						logInt("sample_size", sample.GetBits()),
-					)
-					pl.AddEntropy(sample)
-				}
-			}
-		}
-	}
+	pl.Run(interval, *targetBitsPtr, *maxBitsPtr, cl)
 }

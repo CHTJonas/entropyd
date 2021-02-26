@@ -3,8 +3,6 @@ package pool
 import (
 	"syscall"
 	"unsafe"
-
-	"github.com/chtjonas/entropyd/pkg/entropy"
 )
 
 type randPoolInfo struct {
@@ -15,11 +13,14 @@ type randPoolInfo struct {
 
 const rndAddEntropy = 0x40085203
 
-func (pool *EntropyPool) AddEntropy(sample *entropy.Sample) {
+func (pool *EntropyPool) AddEntropy(entropy *Entropy) {
+	if err := entropy.Validate(); err != nil {
+		panic(err)
+	}
 	arg := unsafe.Pointer(&randPoolInfo{
-		entropyCount: sample.GetBits(),
-		bufSize:      sample.GetSize(),
-		buf:          sample.GetData(),
+		entropyCount: entropy.Count,
+		bufSize:      len(entropy.Data),
+		buf:          entropy.Data,
 	})
 	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(rndAddEntropy), uintptr(arg))
 	if ep != 0 {

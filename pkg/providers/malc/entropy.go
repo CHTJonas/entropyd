@@ -1,11 +1,11 @@
-package entropy
+package malc
 
 import (
 	"encoding/base64"
 	"errors"
 )
 
-type Entropy struct {
+type Sample struct {
 	Data    string `json:"data_b64"`
 	Length  int    `json:"data_len"`
 	Bits    int    `json:"entropy_bits"`
@@ -14,28 +14,19 @@ type Entropy struct {
 	Version int    `json:"version"`
 }
 
-func (entropy *Entropy) GetSize() int {
-	return entropy.Length
-}
-
-func (entropy *Entropy) GetBits() int {
-	return entropy.Bits
-}
-
-func (entropy *Entropy) GetData() []byte {
-	decoded, err := base64.StdEncoding.DecodeString(entropy.Data)
+func (s *Sample) GetData() []byte {
+	decoded, err := base64.StdEncoding.DecodeString(s.Data)
 	if err != nil {
 		panic(err)
 	}
 	return decoded
 }
 
-func (entropy *Entropy) Validate() error {
-	data := entropy.GetData()
-	if len(data) != entropy.Length {
+func (s *Sample) Validate(length int) error {
+	if length != s.Length {
 		return errors.New("Bad data length")
 	}
-	if 8*len(data) < entropy.Bits {
+	if 8*length < s.Bits {
 		return errors.New("Server claims impossibly-good entropy quality")
 	}
 	return nil
