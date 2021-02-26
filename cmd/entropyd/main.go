@@ -18,10 +18,38 @@ const maxDataBytes = 1016
 // Must be no higher than that used by the server.
 const maxReqBits = maxDataBytes * 8
 
-// Software version defaults to the value below but is overridden by the compiler in Makefile.
-var version = "dev-edge"
+var (
+	// Software version defaults to the value below but is overridden by the compiler in Makefile.
+	version = "dev-edge"
+
+	// Command line flags.
+	versionFlag      bool
+	dryRunFlag       bool
+	forceIPv4Flag    bool
+	forceIPv6Flag    bool
+	minBitsFlag      int
+	maxBitsFlag      int
+	targetBitsFlag   int
+	pollIntervalFlag int
+)
 
 func init() {
+	flag.Usage = func() {
+		fmt.Println(usage)
+	}
+	flag.BoolVar(&versionFlag, "v", false, "print software version and exit")
+	flag.BoolVar(&versionFlag, "version", false, "print software version and exit")
+	flag.BoolVar(&dryRunFlag, "dry-run", false, "makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool")
+	flag.BoolVar(&forceIPv4Flag, "4", false, "force the use of IPv4")
+	flag.BoolVar(&forceIPv6Flag, "6", false, "force the use of IPv6")
+	flag.IntVar(&minBitsFlag, "min", 64, "minimum amount of entropy (in bits) to request")
+	flag.IntVar(&maxBitsFlag, "max", maxReqBits, "maximum amount of entropy (in bits) to request")
+	flag.IntVar(&targetBitsFlag, "t", 3072, "kernel entropy pool target value (in bits)")
+	flag.IntVar(&targetBitsFlag, "target", 3072, "kernel entropy pool target value (in bits)")
+	flag.IntVar(&pollIntervalFlag, "p", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
+	flag.IntVar(&pollIntervalFlag, "poll", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
+	flag.Parse()
+
 	if runtime.GOOS != "linux" {
 		fmt.Println("entropyd can only run on Linux")
 		os.Exit(1)
@@ -29,18 +57,8 @@ func init() {
 }
 
 func main() {
-	verThenExit := flag.Bool("version", false, "print software version and exit")
-	ipv4Ptr := flag.Bool("4", false, "force the use of IPv4 for the HTTP connection")
-	ipv6Ptr := flag.Bool("6", false, "force the use of IPv6 for the HTTP connection")
-	minBitsPtr := flag.Int("min", 64, "minimum amount of entropy (in bits) in a HTTP request")
-	maxBitsPtr := flag.Int("max", maxReqBits, "maximum amount of entropy (in bits) in a HTTP request")
-	targetBitsPtr := flag.Int("target", 3072, "target amount of entropy (in bits) to store in the kernel entropy pool")
-	pollIntervalPtr := flag.Int("poll", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
-	doDryRunPtr := flag.Bool("dry-run", false, "makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool")
-	flag.Parse()
-
 	// Print version and exit if the user asked us to.
-	if *verThenExit {
+	if versionFlag {
 		path := os.Args[0]
 		fmt.Println(path, "version", version)
 		os.Exit(0)
@@ -49,20 +67,20 @@ func main() {
 	// Setup User-Agent header and IP protocol version.
 	ua := "entropyd/" + version + " (+https://github.com/CHTJonas/entropyd)"
 	ipv := ""
-	if *ipv4Ptr {
+	if forceIPv4Flag {
 		ipv = "tcp4"
 	}
-	if *ipv6Ptr {
+	if forceIPv6Flag {
 		ipv = "tcp6"
 	}
 
 	// Instantiate the actual entropy client and open the Linux kernel entropy pool.
-	cl := malc.NewEntropyClient(*minBitsPtr, *maxBitsPtr, ua, ipv)
+	cl := malc.NewEntropyClient(minBitsFlag, maxBitsFlag, ua, ipv)
 	pl := pool.OpenPool()
 	defer pl.Cleardown()
 
 	// Perform an dry-run and exit if the user asked us to.
-	if *doDryRunPtr {
+	if dryRunFlag {
 		entropy, err := cl.FetchEntropy(16)
 		if err != nil {
 			fmt.Println(err)
@@ -77,6 +95,6 @@ func main() {
 		logging.LogString("version", version),
 	)
 
-	interval := time.Duration(*pollIntervalPtr)
-	pl.Run(interval, *targetBitsPtr, *maxBitsPtr, cl)
+	interval := time.Duration(pollIntervalFlag)
+	pl.Run(interval, targetBitsFlag, maxBitsFlag, cl)
 }
