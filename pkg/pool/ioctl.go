@@ -5,24 +5,28 @@ import (
 	"unsafe"
 )
 
+// RndAddEntropy is the ioctl request defined by the Linux kernel.
+const RndAddEntropy = 0x40085203
+
+// MaxDataBytes is the maximum size of the ioctl request payload.
+const MaxDataBytes = 1016
+
 type randPoolInfo struct {
-	entropyCount int
-	bufSize      int
+	entropyCount int32
+	bufSize      int32
 	buf          []byte
 }
-
-const rndAddEntropy = 0x40085203
 
 func (pool *EntropyPool) AddEntropy(entropy *Entropy) {
 	if err := entropy.Validate(); err != nil {
 		panic(err)
 	}
-	arg := unsafe.Pointer(&randPoolInfo{
-		entropyCount: entropy.Count,
-		bufSize:      len(entropy.Data),
+	payload := unsafe.Pointer(&randPoolInfo{
+		entropyCount: int32(entropy.Count),
+		bufSize:      int32(len(entropy.Data)),
 		buf:          entropy.Data,
 	})
-	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(rndAddEntropy), uintptr(arg))
+	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(RndAddEntropy), uintptr(payload))
 	if ep != 0 {
 		err := syscall.Errno(ep)
 		panic(err)

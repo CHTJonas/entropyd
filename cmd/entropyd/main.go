@@ -12,12 +12,6 @@ import (
 	"github.com/chtjonas/entropyd/pkg/providers/malc"
 )
 
-// Limit of ioctl requests is 1024 bytes, including header.
-const maxDataBytes = 1016
-
-// Must be no higher than that used by the server.
-const maxReqBits = maxDataBytes * 8
-
 var (
 	// Software version defaults to the value below but is overridden by the compiler in Makefile.
 	version = "dev-edge"
@@ -42,8 +36,8 @@ func init() {
 	flag.BoolVar(&dryRunFlag, "dry-run", false, "makes a request for 512 bits of entropy but writes to stdout instead of the kernel entropy pool")
 	flag.BoolVar(&forceIPv4Flag, "4", false, "force the use of IPv4")
 	flag.BoolVar(&forceIPv6Flag, "6", false, "force the use of IPv6")
-	flag.IntVar(&minBitsFlag, "min", 64, "minimum amount of entropy (in bits) to request")
-	flag.IntVar(&maxBitsFlag, "max", maxReqBits, "maximum amount of entropy (in bits) to request")
+	flag.IntVar(&minBitsFlag, "min", 256, "minimum amount of entropy (in bits) to request")
+	flag.IntVar(&maxBitsFlag, "max", 6080, "maximum amount of entropy (in bits) to request")
 	flag.IntVar(&targetBitsFlag, "t", 3072, "kernel entropy pool target value (in bits)")
 	flag.IntVar(&targetBitsFlag, "target", 3072, "kernel entropy pool target value (in bits)")
 	flag.IntVar(&pollIntervalFlag, "p", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
