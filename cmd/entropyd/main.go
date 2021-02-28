@@ -53,18 +53,19 @@ func init() {
 func main() {
 	// Print version and exit if the user asked us to.
 	if versionFlag {
-		path := os.Args[0]
-		fmt.Println(path, "version", version)
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
-	// Setup User-Agent header and IP protocol version.
+	// Setup User-Agent header.
 	ua := "entropyd/" + version + " (+https://github.com/CHTJonas/entropyd)"
-	ipv := ""
-	if forceIPv4Flag {
+
+	// Set IP protocol version.
+	var ipv string
+	if forceIPv4Flag && !forceIPv6Flag {
 		ipv = "tcp4"
 	}
-	if forceIPv6Flag {
+	if !forceIPv4Flag && forceIPv6Flag {
 		ipv = "tcp6"
 	}
 
