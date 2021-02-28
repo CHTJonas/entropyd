@@ -1,29 +1,43 @@
 package pool
 
 import (
+	"errors"
 	"math"
 	"strconv"
 	"strings"
 	"syscall"
 )
 
-// ComputeBitsNeeded reverses the kernel's asymptotic algorithm to determine how much entropy
-// we need to add to the pool in order for entropy_avail to reach the target.
+var ErrTargetTooLarge = errors.New("Target pool size must be less than full")
+
+// ComputeBitsNeeded reverses the kernel's asymptotic algorithm to determine
+// how much entropy we need to add to the pool in order to reach the target.
 // https://elixir.bootlin.com/linux/v5.4.35/source/drivers/char/random.c#L727
 func computeBitsNeeded(entropyAvailable int, entropyTarget int, poolCapacity int, maxBits int) int {
-	bitsWanted := 0
+	if entropyTarget >= poolCapacity {
+		panic(ErrTargetTooLarge)
+	}
+
+	ea := float64(entropyAvailable)
+	et := float64(entropyTarget)
+	pc := float64(poolCapacity)
+	mb := float64(maxBits)
+	halfCapacity := pc / 2
+	bitsWanted := float64(0)
 	for {
-		bitsThisRound := float64(4*(entropyTarget-entropyAvailable)*poolCapacity) / float64(3*(poolCapacity-entropyAvailable))
-		// Linux only adds half a pool at once, to compensate for wonky simplified formulae.
-		if bitsThisRound <= float64(poolCapacity)/2 {
-			return int(math.Min(math.Ceil(bitsThisRound+float64(bitsWanted)), float64(maxBits)))
+		numerator := 4 * (et - ea) * pc
+		denominator := 3 * (pc - ea)
+		bitsThisRound := numerator / denominator
+		// Linux only adds half a pool at once in order to compensate for wonky simplified formulae.
+		if bitsThisRound <= halfCapacity {
+			return int(math.Min(math.Ceil(bitsThisRound+bitsWanted), mb))
 		}
-		// Pretend we added poolCapacity / 2 and go around again
-		bitsWanted += poolCapacity / 2
-		if bitsWanted >= maxBits {
+		// Pretend we added half a pool and go around again.
+		bitsWanted += halfCapacity
+		if bitsWanted >= mb {
 			return maxBits
 		}
-		entropyAvailable += 3 * (poolCapacity - entropyAvailable) / 8
+		ea += 3 * (pc - ea) / 8
 	}
 }
 
