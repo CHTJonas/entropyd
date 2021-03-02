@@ -10,7 +10,7 @@ type Provider interface {
 	FetchEntropy(bits int) (*Entropy, error)
 }
 
-func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provider Provider) {
+func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provider Provider) error {
 	backoff := make(chan struct{}, 6)
 	go func() {
 		for range time.Tick(2 * time.Second) {
@@ -19,10 +19,19 @@ func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provi
 	}()
 
 	for range time.Tick(interval * time.Millisecond) {
-		entropyAvail := p.GetEntropyAvail()
-		writeWakeupThreshold := p.GetWriteWakeupThreshold()
+		entropyAvail, err := p.GetEntropyAvail()
+		if err != nil {
+			return err
+		}
+		writeWakeupThreshold, err := p.GetWriteWakeupThreshold()
+		if err != nil {
+			return err
+		}
 		if entropyAvail < writeWakeupThreshold {
-			entropyAvailable, bitsNeeded := p.GetBitsNeeded(targetBits, maxBits)
+			entropyAvailable, bitsNeeded, err := p.GetBitsNeeded(targetBits, maxBits)
+			if err != nil {
+				return err
+			}
 			logging.Log("fetching entropy",
 				logging.LogInt("entropy_avail", entropyAvailable),
 				logging.LogInt("entropy_target", targetBits),
@@ -42,4 +51,6 @@ func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provi
 			}
 		}
 	}
+
+	return nil
 }

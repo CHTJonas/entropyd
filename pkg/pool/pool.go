@@ -11,17 +11,29 @@ type EntropyPool struct {
 	sizeFd   int
 }
 
-func OpenPool() *EntropyPool {
-	randFd := getFd("/dev/random", syscall.O_RDWR, 0666)
-	availFd := getFd("/proc/sys/kernel/random/entropy_avail", syscall.O_RDONLY, 0444)
-	threshFd := getFd("/proc/sys/kernel/random/write_wakeup_threshold", syscall.O_RDONLY, 0644)
-	sizeFd := getFd("/proc/sys/kernel/random/poolsize", syscall.O_RDONLY, 0444)
+func OpenPool() (*EntropyPool, error) {
+	randFd, err := getFd("/dev/random", syscall.O_RDWR, 0666)
+	if err != nil {
+		return nil, err
+	}
+	availFd, err := getFd("/proc/sys/kernel/random/entropy_avail", syscall.O_RDONLY, 0444)
+	if err != nil {
+		return nil, err
+	}
+	threshFd, err := getFd("/proc/sys/kernel/random/write_wakeup_threshold", syscall.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	sizeFd, err := getFd("/proc/sys/kernel/random/poolsize", syscall.O_RDONLY, 0444)
+	if err != nil {
+		return nil, err
+	}
 	return &EntropyPool{
 		randFd:   randFd,
 		availFd:  availFd,
 		threshFd: threshFd,
 		sizeFd:   sizeFd,
-	}
+	}, nil
 }
 
 func (pool *EntropyPool) Cleardown() {
@@ -31,21 +43,30 @@ func (pool *EntropyPool) Cleardown() {
 	syscall.Close(pool.sizeFd)
 }
 
-func (pool *EntropyPool) GetEntropyAvail() int {
+func (pool *EntropyPool) GetEntropyAvail() (int, error) {
 	return readIntFromFd(pool.availFd)
 }
 
-func (pool *EntropyPool) GetWriteWakeupThreshold() int {
+func (pool *EntropyPool) GetWriteWakeupThreshold() (int, error) {
 	return readIntFromFd(pool.threshFd)
 }
 
-func (pool *EntropyPool) GetPoolSize() int {
+func (pool *EntropyPool) GetPoolSize() (int, error) {
 	return readIntFromFd(pool.sizeFd)
 }
 
-func (pool *EntropyPool) GetBitsNeeded(entropyTarget int, maxBits int) (int, int) {
-	entropyAvailable := pool.GetEntropyAvail()
-	poolCapacity := pool.GetPoolSize()
-	bitsNeeded := computeBitsNeeded(entropyAvailable, entropyTarget, poolCapacity, maxBits)
-	return entropyAvailable, bitsNeeded
+func (pool *EntropyPool) GetBitsNeeded(entropyTarget int, maxBits int) (int, int, error) {
+	entropyAvailable, err := pool.GetEntropyAvail()
+	if err != nil {
+		return 0, 0, err
+	}
+	poolCapacity, err := pool.GetPoolSize()
+	if err != nil {
+		return 0, 0, err
+	}
+	bitsNeeded, err := computeBitsNeeded(entropyAvailable, entropyTarget, poolCapacity, maxBits)
+	if err != nil {
+		return 0, 0, err
+	}
+	return entropyAvailable, bitsNeeded, nil
 }

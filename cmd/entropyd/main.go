@@ -71,7 +71,11 @@ func main() {
 
 	// Instantiate the actual entropy client and open the Linux kernel entropy pool.
 	cl := malc.NewEntropyClient(minBitsFlag, maxBitsFlag, ua, ipv)
-	pl := pool.OpenPool()
+	pl, err := pool.OpenPool()
+	if err != nil {
+		fmt.Printf("Failed to access kernel entropy pool: %v\n", err)
+		os.Exit(10)
+	}
 	defer pl.Cleardown()
 
 	// Perform an dry-run and exit if the user asked us to.
@@ -91,5 +95,9 @@ func main() {
 	)
 
 	interval := time.Duration(pollIntervalFlag)
-	pl.Run(interval, targetBitsFlag, maxBitsFlag, cl)
+	err = pl.Run(interval, targetBitsFlag, maxBitsFlag, cl)
+	if err != nil {
+		fmt.Printf("Failed to seed kernel entropy pool: %v\n", err)
+		os.Exit(125)
+	}
 }

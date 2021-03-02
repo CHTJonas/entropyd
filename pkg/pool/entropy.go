@@ -7,8 +7,8 @@ type Entropy struct {
 	Count int
 }
 
-var ErrDataTooLarge = errors.New("Entropy payload is too large")
-var ErrImpossiblyHighQuality = errors.New("Claimed entropy quality is impossibly high")
+var ErrDataTooLarge = errors.New("entropy payload is too large")
+var ErrImpossiblyHighQuality = errors.New("claimed entropy quality is impossibly high")
 
 func (e *Entropy) Validate() error {
 	length := len(e.Data)

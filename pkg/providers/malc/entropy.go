@@ -5,6 +5,9 @@ import (
 	"errors"
 )
 
+var ErrBadLength = errors.New("Bad data length")
+var ErrImpossibleQuality = errors.New("Server claims impossibly-good entropy quality")
+
 type Sample struct {
 	Data    string `json:"data_b64"`
 	Length  int    `json:"data_len"`
@@ -14,20 +17,20 @@ type Sample struct {
 	Version int    `json:"version"`
 }
 
-func (s *Sample) GetData() []byte {
+func (s *Sample) GetData() ([]byte, error) {
 	decoded, err := base64.StdEncoding.DecodeString(s.Data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return decoded
+	return decoded, nil
 }
 
 func (s *Sample) Validate(length int) error {
 	if length != s.Length {
-		return errors.New("Bad data length")
+		return ErrBadLength
 	}
 	if 8*length < s.Bits {
-		return errors.New("Server claims impossibly-good entropy quality")
+		return ErrImpossibleQuality
 	}
 	return nil
 }

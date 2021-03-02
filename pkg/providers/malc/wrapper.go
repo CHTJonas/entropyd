@@ -7,9 +7,14 @@ type Wrapper struct {
 }
 
 func (w *Wrapper) ToEntropy() (*pool.Entropy, error) {
+	data, err := w.Sample.GetData()
+	if err != nil {
+		return nil, err
+	}
+	count := w.Sample.Bits
 	e := &pool.Entropy{
-		Data:  w.Sample.GetData(),
-		Count: w.Sample.Bits,
+		Data:  data,
+		Count: count,
 	}
 	length := len(e.Data)
 	if err := w.Sample.Validate(length); err != nil {

@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -17,9 +18,9 @@ type randPoolInfo struct {
 	buf          []byte
 }
 
-func (pool *EntropyPool) AddEntropy(entropy *Entropy) {
+func (pool *EntropyPool) AddEntropy(entropy *Entropy) error {
 	if err := entropy.Validate(); err != nil {
-		panic(err)
+		return fmt.Errorf("failed to validate entropy: %v", err)
 	}
 	payload := unsafe.Pointer(&randPoolInfo{
 		entropyCount: int32(entropy.Count),
@@ -29,6 +30,7 @@ func (pool *EntropyPool) AddEntropy(entropy *Entropy) {
 	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(RndAddEntropy), uintptr(payload))
 	if ep != 0 {
 		err := syscall.Errno(ep)
-		panic(err)
+		return err
 	}
+	return nil
 }
