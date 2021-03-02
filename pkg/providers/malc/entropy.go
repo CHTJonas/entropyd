@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+var ErrBadRandomMagic = errors.New("Bad random magic")
 var ErrBadLength = errors.New("Bad data length")
 var ErrImpossibleQuality = errors.New("Server claims impossibly-good entropy quality")
 
@@ -26,6 +27,9 @@ func (s *Sample) GetData() ([]byte, error) {
 }
 
 func (s *Sample) Validate(length int) error {
+	if s.Magic != 7 {
+		return ErrBadRandomMagic
+	}
 	if length != s.Length {
 		return ErrBadLength
 	}
