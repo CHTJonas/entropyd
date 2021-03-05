@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const ServerURL = "https://entropy.malc.org.uk/entropy/"
+const ServerName = "entropy.malc.org.uk"
 
 type EntropyClient struct {
 	minBits   int
@@ -19,6 +19,7 @@ type EntropyClient struct {
 
 func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
 	tlsconf := &tls.Config{
+		ServerName:               ServerName,
 		MinVersion:               tls.VersionTLS12,
 		PreferServerCipherSuites: false,
 		CurvePreferences:         []tls.CurveID{tls.X25519},
@@ -29,8 +30,8 @@ func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *En
 		},
 	}
 	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 10 * time.Second,
+		Timeout:   5 * time.Second,
+		KeepAlive: -1,
 	}
 	dialCtx := func(ctx context.Context, network, addr string) (net.Conn, error) {
 		if ipVersion != "" {
