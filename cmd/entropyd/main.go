@@ -80,7 +80,7 @@ func main() {
 
 	// Perform an dry-run and exit if the user asked us to.
 	if dryRunFlag {
-		entropy, err := cl.FetchEntropy(16)
+		entropy, err := cl.FetchEntropy(512)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
