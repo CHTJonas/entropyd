@@ -43,11 +43,6 @@ func init() {
 	flag.IntVar(&pollIntervalFlag, "p", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
 	flag.IntVar(&pollIntervalFlag, "poll", 200, "interval (in milliseconds) at which to poll the kernel entropy pool")
 	flag.Parse()
-
-	if runtime.GOOS != "linux" {
-		fmt.Println("entropyd can only run on Linux")
-		os.Exit(1)
-	}
 }
 
 func main() {
@@ -69,14 +64,8 @@ func main() {
 		ipv = "tcp6"
 	}
 
-	// Instantiate the actual entropy client and open the Linux kernel entropy pool.
+	// Instantiate the entropy client.
 	cl := malc.NewEntropyClient(minBitsFlag, maxBitsFlag, ua, ipv)
-	pl, err := pool.OpenPool()
-	if err != nil {
-		fmt.Printf("Failed to access kernel entropy pool: %v\n", err)
-		os.Exit(10)
-	}
-	defer pl.Cleardown()
 
 	// Perform an dry-run and exit if the user asked us to.
 	if dryRunFlag {
@@ -88,6 +77,20 @@ func main() {
 		fmt.Printf("Entropy: %s", entropy.Data)
 		os.Exit(0)
 	}
+
+	// Don't enter the main loop unless we're on Linux.
+	if runtime.GOOS != "linux" {
+		fmt.Println("entropyd can only run on Linux")
+		os.Exit(1)
+	}
+
+	// Open the Linux kernel entropy pool.
+	pl, err := pool.OpenPool()
+	if err != nil {
+		fmt.Printf("Failed to access kernel entropy pool: %v\n", err)
+		os.Exit(10)
+	}
+	defer pl.Cleardown()
 
 	logging.Log("entropyd started successfully",
 		logging.LogString("path", os.Args[0]),
