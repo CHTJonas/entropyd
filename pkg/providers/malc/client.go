@@ -39,15 +39,18 @@ func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *En
 		return dialer.DialContext(ctx, network, addr)
 	}
 	tr := &http.Transport{
-		MaxIdleConns:        10,
-		IdleConnTimeout:     10 * time.Minute,
-		TLSHandshakeTimeout: 10 * time.Second,
-		DisableKeepAlives:   false,
+		TLSHandshakeTimeout: 3 * time.Second,
+		DisableKeepAlives:   true,
 		DisableCompression:  true,
 		TLSClientConfig:     tlsconf,
 		DialContext:         dialCtx,
 	}
-	cl := &http.Client{Transport: tr}
+	cl := &http.Client{
+		Transport: tr,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 
 	return &EntropyClient{
 		minBits:   minBits,
