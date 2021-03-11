@@ -1,13 +1,30 @@
 package pool
 
 import (
+	"fmt"
+	"log"
+	"strings"
 	"time"
-
-	"github.com/chtjonas/entropyd/pkg/logging"
 )
 
 type Provider interface {
 	FetchEntropy(bits int) (*Entropy, error)
+}
+
+func (p *EntropyPool) SetLogger(logger *log.Logger) {
+	p.logger = logger
+}
+
+func (p *EntropyPool) log(msg string, tuples map[string]interface{}) {
+	if p.logger == nil {
+		return
+	}
+	b := new(strings.Builder)
+	fmt.Fprintf(b, "msg=%s", msg)
+	for k, v := range tuples {
+		fmt.Fprintf(b, ", %s=%v", k, v)
+	}
+	p.logger.Println(b.String())
 }
 
 func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provider Provider) error {
@@ -32,21 +49,21 @@ func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provi
 			if err != nil {
 				return err
 			}
-			logging.Log("fetching entropy",
-				logging.LogInt("entropy_avail", entropyAvailable),
-				logging.LogInt("entropy_target", targetBits),
-				logging.LogInt("bits_needed", bitsNeeded),
-			)
+			p.log("fetching entropy", map[string]interface{}{
+				"entropy_avail":  entropyAvailable,
+				"entropy_target": targetBits,
+				"bits_needed":    bitsNeeded,
+			})
 			backoff <- struct{}{}
 			entropy, err := provider.FetchEntropy(bitsNeeded)
 			if err != nil {
-				logging.Log("failed to fetch entropy",
-					logging.LogError("error", err),
-				)
+				p.log("failed to fetch entropy", map[string]interface{}{
+					"error": err,
+				})
 			} else {
-				logging.Log("adding entropy to kernel pool",
-					logging.LogInt("sample_size", entropy.Count),
-				)
+				p.log("adding entropy to kernel pool", map[string]interface{}{
+					"sample_size": entropy.Count,
+				})
 				p.AddEntropy(entropy)
 			}
 		}

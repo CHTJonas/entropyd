@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"log"
 	"syscall"
 )
 
@@ -9,6 +10,7 @@ type EntropyPool struct {
 	availFd  int
 	threshFd int
 	sizeFd   int
+	logger   *log.Logger
 }
 
 func OpenPool() (*EntropyPool, error) {

@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"time"
 
-	"github.com/chtjonas/entropyd/pkg/logging"
 	"github.com/chtjonas/entropyd/pkg/pool"
 	"github.com/chtjonas/entropyd/pkg/providers/malc"
 )
@@ -46,9 +46,12 @@ func init() {
 }
 
 func main() {
+	// Instantiate logger.
+	logger := log.New(os.Stdout, "", 0)
+
 	// Print version and exit if the user asked us to.
 	if versionFlag {
-		fmt.Println(version)
+		logger.Println(version)
 		os.Exit(0)
 	}
 
@@ -71,31 +74,29 @@ func main() {
 	if dryRunFlag {
 		entropy, err := cl.FetchEntropy(512)
 		if err != nil {
-			fmt.Println(err)
+			logger.Println(err)
 			os.Exit(1)
 		}
-		fmt.Printf("Entropy: %s", entropy.Data)
+		logger.Printf("Entropy: %s", entropy.Data)
 		os.Exit(0)
 	}
 
 	// Don't enter the main loop unless we're on Linux.
 	if runtime.GOOS != "linux" {
-		fmt.Println("entropyd can only run on Linux")
+		logger.Println("entropyd can only run on Linux")
 		os.Exit(1)
 	}
 
 	// Open the Linux kernel entropy pool.
 	pl, err := pool.OpenPool()
 	if err != nil {
-		fmt.Printf("Failed to access kernel entropy pool: %v\n", err)
+		logger.Printf("Failed to access kernel entropy pool: %v\n", err)
 		os.Exit(10)
 	}
 	defer pl.Cleardown()
 
-	logging.Log("entropyd started successfully",
-		logging.LogString("path", os.Args[0]),
-		logging.LogString("version", version),
-	)
+	pl.SetLogger(logger)
+	logger.Println("entropyd", version, "started successfully")
 
 	interval := time.Duration(pollIntervalFlag)
 	err = pl.Run(interval, targetBitsFlag, maxBitsFlag, cl)
