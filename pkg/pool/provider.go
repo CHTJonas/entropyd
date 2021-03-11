@@ -49,7 +49,7 @@ func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provi
 			if err != nil {
 				return err
 			}
-			p.log("fetching entropy", map[string]interface{}{
+			p.log("fetching entropy from provider", map[string]interface{}{
 				"entropy_avail":  entropyAvailable,
 				"entropy_target": targetBits,
 				"bits_needed":    bitsNeeded,
@@ -64,10 +64,14 @@ func (p *EntropyPool) Run(interval time.Duration, targetBits, maxBits int, provi
 				p.log("adding entropy to kernel pool", map[string]interface{}{
 					"sample_size": entropy.Count,
 				})
-				p.AddEntropy(entropy)
+				err = p.AddEntropy(entropy)
+				if err != nil {
+					p.log("failed to add entropy", map[string]interface{}{
+						"error": err,
+					})
+				}
 			}
 		}
 	}
-
 	return nil
 }

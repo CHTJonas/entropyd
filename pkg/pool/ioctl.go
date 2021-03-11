@@ -20,7 +20,7 @@ type randPoolInfo struct {
 
 func (pool *EntropyPool) AddEntropy(entropy *Entropy) error {
 	if err := entropy.Validate(); err != nil {
-		return fmt.Errorf("failed to validate entropy: %v", err)
+		return fmt.Errorf("entropy validation failed: %v", err)
 	}
 	payload := unsafe.Pointer(&randPoolInfo{
 		entropyCount: int32(entropy.Count),
@@ -29,8 +29,7 @@ func (pool *EntropyPool) AddEntropy(entropy *Entropy) error {
 	})
 	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, uintptr(pool.randFd), uintptr(RndAddEntropy), uintptr(payload))
 	if ep != 0 {
-		err := syscall.Errno(ep)
-		return err
+		return fmt.Errorf("entropy ioctl syscall failed: %v", ep)
 	}
 	return nil
 }
