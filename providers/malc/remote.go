@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chtjonas/entropyd/pkg/pool"
+	"github.com/chtjonas/entropyd/pool"
 )
 
 var seedOnce sync.Once

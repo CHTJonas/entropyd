@@ -1,6 +1,6 @@
 package malc
 
-import "github.com/chtjonas/entropyd/pkg/pool"
+import "github.com/chtjonas/entropyd/pool"
 
 type Wrapper struct {
 	Sample Sample `json:"entropy"`

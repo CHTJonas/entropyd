@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/chtjonas/entropyd/pkg/pool"
-	"github.com/chtjonas/entropyd/pkg/providers/malc"
+	"github.com/chtjonas/entropyd/pool"
+	"github.com/chtjonas/entropyd/providers/malc"
 )
 
 var (
