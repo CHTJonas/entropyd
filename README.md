@@ -1,16 +1,8 @@
 # Linux Entropy Daemon
 
-This repository hosts the code for a simple client application to seed the Linux kernel with entropy from a remote server via HTTP. It attempts to adhere to the UNIX philosophy of doing one thing and doing it well.
+This repository hosts the code for a simple application to seed the Linux kernel entropy pool with random data from a remote server. It attempts to adhere to the UNIX philosophy of doing one thing and doing it well.
 
-This project is a Go rewrite of [entropyserver](https://hg.sr.ht/~mas90/entropyserver) by Malcolm Scott. Much of the original credit for code logic must go to him.
-
-## Build
-
-To compile the code execute the following in a terminal. This will produce three `entropyd` binaries for the `arm`, `arm64` and `amd64` architectures in different directories under `bin`.
-
-```bash
-make clean && make build
-```
+Parts of this project are a rewrite of [entropyserver](https://hg.sr.ht/~mas90/entropyserver) by Malcolm Scott. Much of the credit for code logic must go to him.
 
 ## Usage
 
@@ -29,6 +21,18 @@ Flags:
     --dry-run                   Make a request for 512 bits of entropy, write to STDOUT and exit.
     -v, --version               Print version and exit.
 ```
+
+# Installation
+
+Pre-built statically-linked binaries for a variety of architectures are available to download from [GitHub Releases](https://github.com/CHTJonas/entropyd/releases). To compile from source you will need a suitable [Go toolchain installed](https://golang.org/doc/install):
+
+```bash
+git clone https://github.com/CHTJonas/entropyd.git
+cd entropyd
+make clean && make build
+```
+
+---
 
 ## Copyright
 
