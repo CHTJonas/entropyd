@@ -38,6 +38,12 @@ func (client *EntropyClient) requestFromServers(bits int) ([]byte, error) {
 	seedOnce.Do(func() { rand.Seed(time.Now().UnixNano()) })
 	rand.Shuffle(len(ips), func(i, j int) { ips[i], ips[j] = ips[j], ips[i] })
 	for _, ip := range ips {
+		if client.ipVersion == "tcp6" && isIPv4(ip) {
+			continue
+		}
+		if client.ipVersion == "tcp4" && !isIPv4(ip) {
+			continue
+		}
 		var data []byte
 		data, err = client.makeRequest(bits, ip)
 		if err != nil {

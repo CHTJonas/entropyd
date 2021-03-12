@@ -15,6 +15,7 @@ type EntropyClient struct {
 	maxBits   int
 	userAgent string
 	client    *http.Client
+	ipVersion string
 }
 
 func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *EntropyClient {
@@ -58,5 +59,6 @@ func NewEntropyClient(minBits int, maxBits int, userAgent, ipVersion string) *En
 		maxBits:   maxBits,
 		userAgent: userAgent,
 		client:    cl,
+		ipVersion: ipVersion,
 	}
 }
