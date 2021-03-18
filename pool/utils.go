@@ -41,7 +41,7 @@ func computeBitsNeeded(entropyAvailable int, entropyTarget int, poolCapacity int
 func getFd(path string, mode int, perm uint32) (int, error) {
 	fd, err := syscall.Open(path, mode, perm)
 	if err != nil {
-		return 0, fmt.Errorf("error opening %s: %v", path, err)
+		return 0, fmt.Errorf("error opening %s: %w", path, err)
 	}
 	return fd, nil
 }
@@ -50,16 +50,16 @@ func readIntFromFd(fd int) (int, error) {
 	buffer := make([]byte, 10, 100)
 	n, err := syscall.Read(fd, buffer)
 	if err != nil {
-		fmt.Errorf("error reading from descriptor %v: %v", fd, err)
+		fmt.Errorf("error reading from descriptor %v: %w", fd, err)
 	}
 	str := strings.ReplaceAll(string(buffer[:n]), "\n", "")
 	i, err := strconv.Atoi(str)
 	if err != nil {
-		fmt.Errorf("error converting %s to int: %v", str, err)
+		fmt.Errorf("error converting %s to int: %w", str, err)
 	}
 	_, err = syscall.Seek(fd, 0, 0)
 	if err != nil {
-		fmt.Errorf("error resetting descriptor %v: %v", fd, err)
+		fmt.Errorf("error resetting descriptor %v: %w", fd, err)
 	}
 	return i, nil
 }
