@@ -22,7 +22,7 @@ Flags:
     -v, --version               Print version and exit.
 ```
 
-# Installation
+## Installation
 
 Pre-built statically-linked binaries for a variety of architectures are available to download from [GitHub Releases](https://github.com/CHTJonas/entropyd/releases). To compile from source you will need a suitable [Go toolchain installed](https://golang.org/doc/install):
 
@@ -31,8 +31,6 @@ git clone https://github.com/CHTJonas/entropyd.git
 cd entropyd
 make clean && make build
 ```
-
----
 
 ## Copyright
 
