@@ -2,7 +2,9 @@
 
 This repository hosts the code for a simple application to seed the Linux kernel entropy pool with random data from a remote server. It attempts to adhere to the UNIX philosophy of doing one thing and doing it well.
 
-Parts of this project are a rewrite of [entropyserver](https://hg.sr.ht/~mas90/entropyserver) by Malcolm Scott. Much of the credit for code logic must go to him.
+Parts of this project are a rewrite of [entropyserver](https://hg.sr.ht/~mas90/entropyserver) by [Malcolm Scott](https://www.cl.cam.ac.uk/~mas90/). Much of the credit for the idea behind this and the original code logic must go to him.
+
+The provider from which entropy is obtained is designed to be modular and extensible, however the only backend currently supported is `entropy.malc.org.uk`. I hope to expand the number of providers in the future and to mix entropy from different providers with whitening.
 
 ## Usage
 
