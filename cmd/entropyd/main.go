@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/chtjonas/entropyd/pool"
@@ -56,7 +57,8 @@ func main() {
 	}
 
 	// Setup User-Agent header.
-	ua := "entropyd/" + version + " (+https://github.com/CHTJonas/entropyd)"
+	ua := fmt.Sprintf("entropyd/%s Go/%s (+https://github.com/CHTJonas/entropyd)",
+		version, strings.TrimPrefix(runtime.Version(), "go"))
 
 	// Set IP protocol version.
 	var ipv string
